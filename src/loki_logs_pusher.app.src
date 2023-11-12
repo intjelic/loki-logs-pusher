@@ -1,0 +1,8 @@
+{application, 'loki_logs_pusher', [
+	{description, "Logs pusher to Loki for your Erlang logger handlers."},
+	{vsn, "0.1.0"},
+	{modules, ['loki_logs_pusher']},
+	{registered, []},
+	{applications, [kernel,stdlib]},
+	{env, []}
+]}.
