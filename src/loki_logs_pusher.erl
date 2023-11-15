@@ -119,6 +119,7 @@ init([Host, Port, Journal]) ->
         retry_timeout => ?CONNECTION_RETRY
     }),
     {ok, Timer} = timer:send_interval(?PUSH_INTERVAL, self(), send_logs),
+    logger:info("pushing logs to loki every ~p ms", [?PUSH_INTERVAL]),
 
     {ok, #state{
         connection = Connection,
@@ -173,6 +174,7 @@ handle_continue(
         {response, fin, 204, _} ->
             {noreply, State#state{logs = #{}}};
         _ ->
+            logger:debug("failed to send logs to loki; retying later..."),
             {noreply, State}
     end.
 
@@ -180,12 +182,14 @@ handle_info(
     {gun_up, Connection, http},
     #state{connection = Connection} = State
 ) ->
+    logger:info("loki is up"),
     {noreply, State};
 
 handle_info(
     {gun_down, Connection, http, _Reason, _KilledStreams},
     #state{connection = Connection} = State
 ) ->
+    logger:info("loki is down"),
     {noreply, State};
 
 handle_info(send_logs, State) ->
